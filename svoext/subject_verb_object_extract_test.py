@@ -13,12 +13,15 @@
 # limitations under the License.
 
 import unittest
+import spacy
 
-from subject_verb_object_extract import findSVOs, printDeps, nlp
+from svoext.subject_verb_object_extract import findSVOs, printDeps
+nlp = spacy.load('en_core_web_sm')
 
 
 # test the subject/verb/object_extraction
 class SubjectVerbOjectExtractTest(unittest.TestCase):
+
     def __init__(self, methodName: str):
         unittest.TestCase.__init__(self, methodName)
 

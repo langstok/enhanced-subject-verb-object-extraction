@@ -14,17 +14,28 @@
 
 import en_core_web_sm
 
-# use spacy small model
-nlp = en_core_web_sm.load()
+univeral_dependencies = False
+# The Universal Dependencies scheme is used in all languages trained on Universal Dependency Corpora.
+# The English dependency labels use the CLEAR Style by ClearNLP.
 
 # dependency markers for subjects
 SUBJECTS = {"nsubj", "nsubjpass", "csubj", "csubjpass", "agent", "expl"}
+if univeral_dependencies:
+    SUBJECTS = {"nsubj", "nsubjpass", "csubj", "csubjpass", "agent", "expl"}
+
 # dependency markers for objects
 OBJECTS = {"dobj", "dative", "attr", "oprd"}
+if univeral_dependencies:
+    OBJECTS = {"iobj", "obj"}
+
+# spaCy maps all language-specific part-of-speech tags to a small, fixed set of word type tags following the Universal Dependencies scheme.
+# The English part-of-speech tagger uses the OntoNotes 5 version of the Penn Treebank tag set (TAG). We also map the tags to the simpler Universal Dependencies v2 POS tag set (POS).
+# The German part-of-speech tagger uses the TIGER Treebank annotation scheme. We also map the tags to the simpler Universal Dependencies v2 POS tag set.
 # POS tags that will break adjoining items
 BREAKER_POS = {"CCONJ", "VERB"}
 # words that are negations
 NEGATIONS = {"no", "not", "n't", "never", "none"}
+# NEGATIONS = {"nee", "niet", "nooit", "geen"}
 
 
 # does dependency set contain any coordinating conjunctions?
@@ -32,6 +43,9 @@ def contains_conj(depSet):
     return "and" in depSet or "or" in depSet or "nor" in depSet or \
            "but" in depSet or "yet" in depSet or "so" in depSet or "for" in depSet
 
+# def contains_conj(depSet):
+#     return "en" in depSet or "of" in depSet or "nog" in depSet or \
+#            "maar" in depSet or "dusver" in depSet or "dus" in depSet or "voor" in depSet
 
 # get subs joined by conjunctions
 def _get_subs_from_conjunctions(subs):
@@ -67,7 +81,8 @@ def _find_subs(tok):
     while head.pos_ != "VERB" and head.pos_ != "NOUN" and head.head != head:
         head = head.head
     if head.pos_ == "VERB":
-        subs = [tok for tok in head.lefts if tok.dep_ == "SUB"]
+        # subs = [tok for tok in head.lefts if tok.dep_ == "SUB"]
+        subs = [tok for tok in head.lefts if "SUB".lower() in tok.dep_.lower()]
         if len(subs) > 0:
             verb_negated = _is_negated(head)
             subs.extend(_get_subs_from_conjunctions(subs))
@@ -207,14 +222,6 @@ def _get_that_resolution(toks):
         if 'that' in [t.orth_ for t in tok.lefts]:
             return tok.head
     return toks
-
-
-# simple stemmer using lemmas
-def _get_lemma(word: str):
-    tokens = nlp(word)
-    if len(tokens) == 1:
-        return tokens[0].lemma_
-    return word
 
 
 # print information for displaying all kinds of things of the parse tree

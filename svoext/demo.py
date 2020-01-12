@@ -1,4 +1,4 @@
-from subject_verb_object_extract import findSVOs, nlp
+from svoext.subject_verb_object_extract import findSVOs, nlp
 
 str1 = "Then there’s a development setback on top of that that pushes you even further back."
 str2 = "And that goes with that we’re going to do things differently, but we haven’t done that yet."
